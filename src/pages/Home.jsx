@@ -5,7 +5,7 @@ import AboutPreview from "../components/sections/AboutPreview";
 import SkillsPreview from "../components/sections/SkillsPreview";
 import ProjectsPreview from "../components/sections/ProjectsPreview";
 import ContactPreview from "../components/sections/ContactPreview";
-import { getPortfolio } from "../../../Backend/src/api/portfolioApi";
+import { getPortfolio } from "../api/portfolioApi";
 import { getProjects } from "../../../Backend/src/api/projectApi";
 
 const Home = () => {
