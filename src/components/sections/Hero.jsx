@@ -11,6 +11,7 @@ import {
 
 const Hero = ({ portfolio }) => {
   const [showResumeModal, setShowResumeModal] = useState(false);
+  const [zoom, setZoom] = useState(1);
 
   const socialLinks = [
     {
@@ -41,7 +42,7 @@ const Hero = ({ portfolio }) => {
         id="home"
         className="relative overflow-hidden px-4 py-14 sm:px-6 lg:px-8"
       >
-        {/* background */}
+        {/* BACKGROUND */}
         <div className="absolute inset-0 -z-10">
           <div className="absolute left-1/2 top-0 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-blue-500/10 blur-[120px]" />
           <div className="absolute bottom-0 left-0 h-[260px] w-[260px] rounded-full bg-cyan-400/10 blur-[120px]" />
@@ -49,13 +50,14 @@ const Hero = ({ portfolio }) => {
 
         <div className="mx-auto max-w-6xl">
 
-          {/* PREMIUM BOX */}
+          {/* MAIN CARD */}
           <div className="rounded-[28px] border border-slate-200 bg-white/60 shadow-xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/60">
 
             <div className="grid items-center gap-10 p-6 lg:grid-cols-2 lg:p-10">
 
-              {/* LEFT SIDE (UNCHANGED) */}
+              {/* LEFT */}
               <div className="space-y-6">
+
                 <div className="inline-flex items-center rounded-full border border-slate-200 bg-white/70 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
                   Portfolio
                 </div>
@@ -74,9 +76,13 @@ const Hero = ({ portfolio }) => {
                 </p>
 
                 <div className="flex flex-wrap items-center gap-4 pt-2">
+
                   {portfolio?.resumeLink && (
                     <button
-                      onClick={() => setShowResumeModal(true)}
+                      onClick={() => {
+                        setZoom(1);
+                        setShowResumeModal(true);
+                      }}
                       className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-blue-900 dark:bg-white dark:text-slate-900"
                     >
                       <FaEye size={13} />
@@ -91,21 +97,22 @@ const Hero = ({ portfolio }) => {
                     Contact Me
                     <FaArrowRight size={12} />
                   </a>
+
                 </div>
               </div>
 
-              {/* RIGHT SIDE (PROFILE FOCUSED) */}
+              {/* RIGHT */}
               <div className="flex justify-center">
 
                 <div className="w-full max-w-sm overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-md dark:border-slate-800 dark:bg-slate-900">
 
-                  {/* banner */}
-                  <div className="relative h-[240px]">
+                  <div className="relative h-[280px] overflow-hidden">
+
                     {portfolio?.bannerImage ? (
                       <img
                         src={portfolio.bannerImage}
                         alt="banner"
-                        className="h-full w-full object-cover opacity-90"
+                        className="h-full w-full object-contain object-center scale-105"
                       />
                     ) : (
                       <div className="h-full w-full bg-slate-900" />
@@ -114,9 +121,9 @@ const Hero = ({ portfolio }) => {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                   </div>
 
-                  {/* PROFILE (MORE DOMINANT) */}
                   <div className="relative -mt-16 flex justify-center">
                     <div className="h-32 w-32 overflow-hidden rounded-full border-4 border-white shadow-xl dark:border-slate-900">
+
                       {portfolio?.profileImage ? (
                         <img
                           src={portfolio.profileImage}
@@ -128,12 +135,13 @@ const Hero = ({ portfolio }) => {
                           {portfolio?.name?.charAt(0) || "A"}
                         </div>
                       )}
+
                     </div>
                   </div>
 
-                  {/* SOCIAL */}
                   {socialLinks.length > 0 && (
                     <div className="flex justify-center gap-3 pt-5 pb-6">
+
                       {socialLinks.map((item) => (
                         <a
                           key={item.key}
@@ -145,36 +153,66 @@ const Hero = ({ portfolio }) => {
                           {item.icon}
                         </a>
                       ))}
+
                     </div>
                   )}
+
                 </div>
               </div>
 
             </div>
           </div>
 
-          {/* HR OUTSIDE */}
           <div className="mt-10 border-t border-slate-200 dark:border-slate-800" />
         </div>
       </section>
 
-      {/* MODAL */}
+      {/* ================= RESUME MODAL (FIXED ONLY) ================= */}
       {showResumeModal && portfolio?.resumeLink && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-4 backdrop-blur-md">
+        <div className="fixed inset-0 z-[9999] flex flex-col bg-black/90 backdrop-blur-md">
+
+          {/* CLOSE BUTTON */}
           <button
             onClick={() => setShowResumeModal(false)}
-            className="absolute right-5 top-5 flex h-11 w-11 items-center justify-center rounded-full bg-white text-black shadow-lg"
+            className="absolute right-5 top-5 flex h-11 w-11 items-center justify-center rounded-full bg-white text-black shadow-lg transition hover:scale-105"
           >
             <FaTimes />
           </button>
 
-          <div className="max-h-[90vh] w-full max-w-5xl overflow-auto rounded-3xl bg-white p-3 shadow-2xl dark:bg-slate-900">
+          {/* ZOOM CONTROLS */}
+          <div className="absolute left-5 top-5 flex items-center gap-2">
+
+            <button
+              onClick={() => setZoom((z) => Math.min(z + 0.2, 3))}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-black shadow-md"
+            >
+              +
+            </button>
+
+            <button
+              onClick={() => setZoom((z) => Math.max(z - 0.2, 0.5))}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-black shadow-md"
+            >
+              -
+            </button>
+
+          </div>
+
+          {/* IMAGE VIEW */}
+          <div className="flex flex-1 items-center justify-center overflow-auto p-6">
+
             <img
               src={portfolio.resumeLink}
               alt="resume"
-              className="w-full rounded-2xl object-cover"
+              style={{
+                transform: `scale(${zoom})`,
+                transition: "transform 0.25s ease",
+              }}
+              className="max-h-[95vh] max-w-full select-none rounded-md shadow-2xl object-contain"
             />
+
           </div>
+
         </div>
       )}
     </>
