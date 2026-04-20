@@ -88,7 +88,7 @@ const Dashboard = () => {
   const [certificateForm, setCertificateForm] = useState({
     name: "",
     issuer: "",
-    image: "",
+    images: [],
     credentialLink: "",
   });
   const [editingCertificateIndex, setEditingCertificateIndex] = useState(null);
@@ -147,7 +147,16 @@ const Dashboard = () => {
       ...(data?.contactInfo || {}),
     },
     skills: Array.isArray(data?.skills) ? data.skills : [],
-    certificates: Array.isArray(data?.certificates) ? data.certificates : [],
+    certificates: Array.isArray(data?.certificates)
+      ? data.certificates.map((certificate) => ({
+          ...certificate,
+          images: Array.isArray(certificate?.images)
+            ? certificate.images
+            : certificate?.image
+            ? [certificate.image]
+            : [],
+        }))
+      : [],
     experiences: Array.isArray(data?.experiences) ? data.experiences : [],
   });
 
@@ -318,24 +327,31 @@ const Dashboard = () => {
   };
 
   const handleCertificateImageUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
 
     try {
       setUploadingCertificateImage(true);
-      const url = await uploadImage(file);
+      const urls = await uploadMultipleImages(files);
 
       setCertificateForm((prev) => ({
         ...prev,
-        image: url,
+        images: [...prev.images, ...urls],
       }));
 
-      showSuccess("Certificate image uploaded.");
+      showSuccess("Certificate images uploaded.");
     } catch (error) {
-      showError("Failed to upload certificate image.");
+      showError("Failed to upload certificate images.");
     } finally {
       setUploadingCertificateImage(false);
     }
+  };
+
+  const removeCertificateImage = (index) => {
+    setCertificateForm((prev) => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index),
+    }));
   };
 
   const addSkill = () => {
@@ -413,7 +429,9 @@ const Dashboard = () => {
     const certificatePayload = {
       name: certificateForm.name.trim(),
       issuer: certificateForm.issuer.trim(),
-      image: certificateForm.image || "",
+      images: Array.isArray(certificateForm.images)
+        ? certificateForm.images
+        : [],
       credentialLink: certificateForm.credentialLink.trim(),
     };
 
@@ -437,7 +455,7 @@ const Dashboard = () => {
     setCertificateForm({
       name: "",
       issuer: "",
-      image: "",
+      images: [],
       credentialLink: "",
     });
   };
@@ -447,7 +465,11 @@ const Dashboard = () => {
     setCertificateForm({
       name: certificate.name || "",
       issuer: certificate.issuer || "",
-      image: certificate.image || "",
+      images: Array.isArray(certificate.images)
+        ? certificate.images
+        : certificate.image
+        ? [certificate.image]
+        : [],
       credentialLink: certificate.credentialLink || "",
     });
     setEditingCertificateIndex(index);
@@ -467,7 +489,7 @@ const Dashboard = () => {
       setCertificateForm({
         name: "",
         issuer: "",
-        image: "",
+        images: [],
         credentialLink: "",
       });
     }
@@ -766,6 +788,7 @@ const Dashboard = () => {
             handleSavePortfolio={handleSavePortfolio}
             handleCertificateImageUpload={handleCertificateImageUpload}
             uploadingCertificateImage={uploadingCertificateImage}
+            removeCertificateImage={removeCertificateImage}
           />
         );
 

@@ -11,6 +11,7 @@ const CertificateSection = ({
   handleSavePortfolio,
   handleCertificateImageUpload,
   uploadingCertificateImage,
+  removeCertificateImage,
 }) => {
   return (
     <div>
@@ -19,7 +20,7 @@ const CertificateSection = ({
           Certificates
         </h2>
         <p className="mt-2 text-slate-600 dark:text-slate-400">
-          Add certificate name, issuer, image and credential link.
+          Add certificate name, issuer, images and credential link.
         </p>
       </div>
 
@@ -73,27 +74,45 @@ const CertificateSection = ({
         </div>
 
         <div className="md:col-span-2">
-          <label className={labelClass}>Certificate Image</label>
+          <label className={labelClass}>Certificate Images</label>
           <input
             type="file"
             accept="image/*"
+            multiple
             onChange={handleCertificateImageUpload}
             className={inputClass}
           />
 
           {uploadingCertificateImage && (
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-              Uploading certificate image...
+              Uploading certificate images...
             </p>
           )}
 
-          {certificateForm.image && (
-            <img
-              src={certificateForm.image}
-              alt="certificate"
-              className="mt-3 h-40 w-full max-w-md rounded-2xl object-cover border border-slate-200 dark:border-slate-700"
-            />
-          )}
+          {Array.isArray(certificateForm.images) &&
+            certificateForm.images.length > 0 && (
+              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {certificateForm.images.map((img, index) => (
+                  <div
+                    key={index}
+                    className="relative overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700"
+                  >
+                    <img
+                      src={img}
+                      alt={`certificate-${index}`}
+                      className="h-40 w-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeCertificateImage(index)}
+                      className="absolute right-2 top-2 rounded-lg bg-red-500 px-3 py-1 text-xs font-medium text-white hover:bg-red-600"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
         </div>
       </div>
 
@@ -102,7 +121,9 @@ const CertificateSection = ({
         onClick={addCertificate}
         className="mt-5 rounded-2xl bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-900 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
       >
-        {editingCertificateIndex !== null ? "Update Certificate" : "Add Certificate"}
+        {editingCertificateIndex !== null
+          ? "Update Certificate"
+          : "Add Certificate"}
       </button>
 
       <div className="mt-8 space-y-4">
@@ -118,13 +139,19 @@ const CertificateSection = ({
             >
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div className="flex-1">
-                  {certificate.image && (
-                    <img
-                      src={certificate.image}
-                      alt={certificate.name}
-                      className="mb-4 h-40 w-full max-w-sm rounded-2xl object-cover border border-slate-200 dark:border-slate-700"
-                    />
-                  )}
+                  {Array.isArray(certificate.images) &&
+                    certificate.images.length > 0 && (
+                      <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {certificate.images.map((img, imgIndex) => (
+                          <img
+                            key={imgIndex}
+                            src={img}
+                            alt={`${certificate.name}-${imgIndex}`}
+                            className="h-40 w-full rounded-2xl border border-slate-200 object-cover dark:border-slate-700"
+                          />
+                        ))}
+                      </div>
+                    )}
 
                   <h3 className="text-lg font-bold text-slate-900 dark:text-white">
                     {certificate.name}
