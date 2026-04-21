@@ -25,8 +25,7 @@ const SkillsPreview = ({ portfolio }) => {
 
   return (
     <>
-      <section className="relative px-6 py-10 overflow-hidden">
-
+      <section className="relative overflow-hidden px-6 py-10">
         {/* BACKGROUND */}
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -top-20 left-10 h-72 w-72 rounded-full bg-blue-500/10 blur-[120px]" />
@@ -34,7 +33,6 @@ const SkillsPreview = ({ portfolio }) => {
         </div>
 
         <div className="relative mx-auto max-w-7xl rounded-[36px] border border-slate-300/80 bg-white/50 p-5 shadow-[0_35px_100px_rgba(15,23,42,0.10)] backdrop-blur-3xl dark:border-slate-800/60 dark:bg-slate-950/30">
-
           {/* ================= SKILLS ================= */}
           {hasSkills && (
             <div className="mb-10">
@@ -42,7 +40,6 @@ const SkillsPreview = ({ portfolio }) => {
 
               <div className="rounded-3xl border border-slate-300/70 bg-white/50 p-6 dark:border-slate-700/40 dark:bg-slate-900/30">
                 <div className="grid gap-6 md:grid-cols-2">
-
                   {portfolio.skills.map((skill, index) => (
                     <div
                       key={index}
@@ -64,7 +61,6 @@ const SkillsPreview = ({ portfolio }) => {
                       </div>
                     </div>
                   ))}
-
                 </div>
               </div>
             </div>
@@ -76,72 +72,66 @@ const SkillsPreview = ({ portfolio }) => {
               <SectionTitle>Certificates</SectionTitle>
 
               <div className="rounded-3xl border border-slate-300/80 bg-white/60 p-5 dark:border-slate-700/50 dark:bg-slate-900/40">
-
-                {/* 3 COLUMN GRID */}
-                <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {portfolio.certificates.map((certificate, index) => (
                     <div
                       key={index}
-                      onClick={() => setOpenImage(certificate.image)}
-                      className="group relative cursor-pointer overflow-hidden rounded-2xl border border-slate-200/70 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-2xl dark:border-slate-700/50 dark:bg-slate-900/40"
+                      onClick={() =>
+                        certificate.image && setOpenImage(certificate.image)
+                      }
+                      className="group flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200/80 bg-white/90 p-3 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-slate-700/50 dark:bg-slate-900/50"
                     >
-
-                      {/* IMAGE (SMALL + CLEAN) */}
-                      <div className="relative h-20 w-full overflow-hidden">
-
-                        {certificate.image && (
+                      {/* SMALL IMAGE LEFT */}
+                      <div className="relative h-16 w-20 flex-shrink-0 overflow-hidden rounded-xl">
+                        {certificate.image ? (
                           <>
-                            {/* blur background */}
                             <img
                               src={certificate.image}
-                              className="absolute inset-0 h-full w-full scale-150 object-cover blur-xl brightness-75"
+                              alt={certificate.name || "Certificate"}
+                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                             />
 
-                            {/* main image */}
-                            <img
-                              src={certificate.image}
-                              className="relative h-full w-full object-cover transition duration-300 group-hover:scale-110"
-                            />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition duration-300 group-hover:opacity-100">
+                              <FaEye className="text-sm text-white" />
+                            </div>
                           </>
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center bg-slate-100 text-[10px] text-slate-400 dark:bg-slate-800">
+                            No image
+                          </div>
                         )}
-
-                        {/* HOVER OVERLAY */}
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition group-hover:opacity-100">
-                          <FaEye className="text-white text-xl" />
-                        </div>
                       </div>
 
-                      {/* TEXT (VERY FOCUSED) */}
-                      <div className="p-3 text-center">
-
-                        <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                      {/* TEXT RIGHT */}
+                      <div className="min-w-0 flex-1">
+                        <h4 className="line-clamp-2 text-sm font-bold leading-snug text-slate-900 dark:text-white">
                           {certificate.name}
                         </h4>
 
                         {certificate.issuer && (
-                          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                          <p className="mt-1 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
                             {certificate.issuer}
                           </p>
                         )}
-
                       </div>
 
+                      {/* RIGHT VIEW ICON */}
+                      
                     </div>
                   ))}
-
                 </div>
               </div>
             </div>
           )}
-
         </div>
       </section>
 
       {/* IMAGE MODAL */}
       {openImage && (
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/95">
-
+        <div
+          className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/95 px-4"
+          onClick={() => setOpenImage(null)}
+        >
           <button
             onClick={() => setOpenImage(null)}
             className="absolute right-6 top-6 flex h-10 w-10 items-center justify-center rounded-full bg-white text-black shadow-lg"
@@ -151,7 +141,9 @@ const SkillsPreview = ({ portfolio }) => {
 
           <img
             src={openImage}
-            className="max-h-[90vh] max-w-[95vw] object-contain"
+            alt="Certificate Preview"
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-[90vh] max-w-[95vw] rounded-2xl object-contain"
           />
         </div>
       )}
