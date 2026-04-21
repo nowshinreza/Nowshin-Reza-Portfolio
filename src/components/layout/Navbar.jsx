@@ -131,7 +131,7 @@ const Navbar = () => {
             {isAdminLoggedIn ? (
               <Link
                 to="/dashboard"
-                className="hidden rounded-full bg-gradient-to-r from-blue-600 to-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:scale-110 md:inline-flex"
+                className="hidden rounded-full bg-gradient-to-r from-blue-900 to-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:scale-110 md:inline-flex"
               >
                 Dashboard
               </Link>

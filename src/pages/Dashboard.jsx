@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Swal from "sweetalert2";
 import DashboardSidebar from "../components/dashboard/DashboardSidebar";
 import PortfolioSection from "../components/dashboard/PortfolioSection";
 import AboutSection from "../components/dashboard/AboutSection";
@@ -195,21 +196,56 @@ const Dashboard = () => {
     fetchProjects();
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      await axios.post(
-        `${API_URL}/api/auth/logout`,
-        {},
-        { withCredentials: true }
-      );
-    } catch (error) {
-      console.error("Logout request failed", error);
-    } finally {
-      localStorage.removeItem("portfolio_admin");
-      window.dispatchEvent(new Event("admin-auth-changed"));
-      navigate("/login");
-    }
-  };
+
+const handleLogout = async () => {
+  const result = await Swal.fire({
+    title: "Are you sure?",
+    text: "You will be logged out from your account.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#ef4444",
+    cancelButtonColor: "#6b7280",
+    confirmButtonText: "Yes, logout",
+    cancelButtonText: "Cancel",
+  });
+
+  if (!result.isConfirmed) return;
+
+  try {
+    await axios.post(
+      `${API_URL}/api/auth/logout`,
+      {},
+      { withCredentials: true }
+    );
+
+    localStorage.removeItem("portfolio_admin");
+    window.dispatchEvent(new Event("admin-auth-changed"));
+
+    await Swal.fire({
+      icon: "success",
+      title: "Logged out successfully!",
+      timer: 1500,
+      showConfirmButton: false,
+    });
+
+    navigate("/login");
+  } catch (error) {
+    console.error("Logout request failed", error);
+
+    localStorage.removeItem("portfolio_admin");
+    window.dispatchEvent(new Event("admin-auth-changed"));
+
+    await Swal.fire({
+      icon: "info",
+      title: "Logged out locally",
+      text: "Server request failed, but you are logged out.",
+      timer: 2000,
+      showConfirmButton: false,
+    });
+
+    navigate("/login");
+  }
+};
 
   const handlePortfolioChange = (e) => {
     const { name, value } = e.target;
@@ -870,7 +906,7 @@ const Dashboard = () => {
           <button
             type="button"
             onClick={handleLogout}
-            className="rounded-2xl bg-red-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-600"
+            className="rounded-2xl bg-red-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-500"
           >
             Logout
           </button>

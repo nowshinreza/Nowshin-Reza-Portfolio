@@ -10,6 +10,10 @@ const ProjectDetails = () => {
   const [relatedProjects, setRelatedProjects] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // ================= IMAGE VIEWER =================
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+
   useEffect(() => {
     const loadProject = async () => {
       try {
@@ -26,7 +30,7 @@ const ProjectDetails = () => {
 
         const filtered = (allProjectsRes?.data?.data || [])
           .filter((item) => item.slug !== slug)
-          .slice(0, 3);
+          .slice(0, 30);
 
         setRelatedProjects(filtered);
       } catch (error) {
@@ -53,6 +57,53 @@ const ProjectDetails = () => {
       })
       .filter(Boolean);
   }, [project]);
+
+  // ================= COMBINED IMAGES (COVER + GALLERY) =================
+  const allImages = useMemo(() => {
+    const imgs = [];
+
+    if (project?.coverImage) {
+      imgs.push(project.coverImage);
+    }
+
+    if (Array.isArray(galleryImages)) {
+      imgs.push(...galleryImages);
+    }
+
+    return imgs;
+  }, [project, galleryImages]);
+
+  // ================= HANDLERS =================
+  const openViewer = (index) => {
+    setActiveIndex(index);
+    setViewerOpen(true);
+  };
+
+  const closeViewer = () => setViewerOpen(false);
+
+  const nextImage = () => {
+    setActiveIndex((prev) => (prev + 1) % allImages.length);
+  };
+
+  const prevImage = () => {
+    setActiveIndex((prev) =>
+      prev === 0 ? allImages.length - 1 : prev - 1
+    );
+  };
+
+  // ================= KEYBOARD CONTROL =================
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (!viewerOpen) return;
+
+      if (e.key === "Escape") closeViewer();
+      if (e.key === "ArrowRight") nextImage();
+      if (e.key === "ArrowLeft") prevImage();
+    };
+
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [viewerOpen, allImages.length]);
 
   if (loading) {
     return (
@@ -98,7 +149,6 @@ const ProjectDetails = () => {
           {/* ================= MAIN ================= */}
           <section className="rounded-[36px] border border-slate-200 bg-white/70 p-10 shadow-xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/60">
 
-            {/* TITLE */}
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-navy-700 dark:text-blue-300">
               Project Overview
             </p>
@@ -113,12 +163,13 @@ const ProjectDetails = () => {
               </p>
             )}
 
-            {/* COVER */}
+            {/* COVER IMAGE */}
             <div className="mt-8 overflow-hidden rounded-[30px] border border-slate-200 shadow-md dark:border-slate-800">
               {project.coverImage ? (
                 <img
                   src={project.coverImage}
-                  className="h-[380px] w-full object-contain transition hover:scale-105 duration-500"
+                  onClick={() => openViewer(0)}
+                  className="h-[380px] w-full object-contain transition hover:scale-105 duration-500 cursor-pointer"
                 />
               ) : (
                 <div className="h-[380px] w-full bg-gradient-to-br from-slate-900 to-blue-900" />
@@ -148,39 +199,54 @@ const ProjectDetails = () => {
               </div>
             )}
 
-            {/* GALLERY */}
+            {/* ================= GALLERY ================= */}
             {galleryImages.length > 0 && (
               <div className="mt-10">
                 <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
                   Gallery
                 </h2>
 
-                <div className="mt-5 grid gap-5 sm:grid-cols-2">
-                  {galleryImages.map((img, i) => (
+                <div className="mt-5 grid gap-5 sm:grid-cols-3">
+
+                  {galleryImages.slice(0, 40).map((img, i) => (
                     <div
                       key={i}
-                      className="group overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800"
+                      onClick={() => openViewer(i + 1)} // +1 because cover is index 0
+                      className="group overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800 cursor-pointer"
                     >
                       <img
                         src={img}
-                        className="h-64 w-full object-cover transition duration-500 group-hover:scale-110"
+                        className="h-50 w-full object-contain transition duration-500 group-hover:scale-110"
                       />
                     </div>
                   ))}
+
+                  {galleryImages.length > 40 && (
+                    <div
+                      onClick={() => openViewer(5)}
+                      className="relative overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800 cursor-pointer"
+                    >
+                      <img
+                        src={galleryImages[40]}
+                        className="h-64 w-full object-cover blur-sm scale-110"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white text-2xl font-bold">
+                        +{galleryImages.length - 40}
+                      </div>
+                    </div>
+                  )}
+
                 </div>
               </div>
             )}
           </section>
 
-          {/* ================= SIDEBAR ================= */}
+          {/* ================= SIDEBAR (UNCHANGED) ================= */}
           <aside className="space-y-8">
-
-            {/* TOOLS */}
             <div className="rounded-[30px] border border-slate-200 bg-white p-8 shadow-md dark:border-slate-800 dark:bg-slate-900">
               <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
                 Tools
               </h2>
-
               <div className="mt-5 flex flex-wrap gap-3">
                 {project.tools?.map((tool, i) => (
                   <span
@@ -193,7 +259,6 @@ const ProjectDetails = () => {
               </div>
             </div>
 
-            {/* LINKS */}
             <div className="rounded-[30px] border border-slate-200 bg-white p-8 shadow-md dark:border-slate-800 dark:bg-slate-900">
               <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
                 Links
@@ -222,7 +287,6 @@ const ProjectDetails = () => {
               </div>
             </div>
 
-            {/* RELATED */}
             <div className="rounded-[30px] border border-slate-200 bg-white p-8 shadow-md dark:border-slate-800 dark:bg-slate-900">
               <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
                 More Projects
@@ -245,10 +309,41 @@ const ProjectDetails = () => {
                 ))}
               </div>
             </div>
-
           </aside>
         </div>
       </main>
+
+      {/* ================= FULLSCREEN VIEWER ================= */}
+      {viewerOpen && (
+        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center">
+
+          <button
+            onClick={closeViewer}
+            className="absolute top-6 right-6 text-white text-3xl"
+          >
+            ✕
+          </button>
+
+          <button
+            onClick={prevImage}
+            className="absolute left-6 text-white text-4xl"
+          >
+            ‹
+          </button>
+
+          <img
+            src={allImages[activeIndex]}
+            className="max-h-[85vh] max-w-[90vw] rounded-2xl shadow-2xl"
+          />
+
+          <button
+            onClick={nextImage}
+            className="absolute right-6 text-white text-4xl"
+          >
+            ›
+          </button>
+        </div>
+      )}
     </div>
   );
 };
