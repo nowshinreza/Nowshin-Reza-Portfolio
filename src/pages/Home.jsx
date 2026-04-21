@@ -33,11 +33,25 @@ const Home = () => {
       <Navbar />
 
       <main className="pt-28">
-        <Hero portfolio={portfolio} />
-        <AboutPreview portfolio={portfolio} />
-        <SkillsPreview portfolio={portfolio} />
-        <ProjectsPreview projects={projects} />
-        <ContactPreview portfolio={portfolio} />
+        <section id="home">
+          <Hero portfolio={portfolio} />
+        </section>
+
+        <section id="about">
+          <AboutPreview portfolio={portfolio} />
+        </section>
+
+        <section id="skills">
+          <SkillsPreview portfolio={portfolio} />
+        </section>
+
+        <section id="projects">
+          <ProjectsPreview projects={projects} />
+        </section>
+
+        <section id="contact">
+          <ContactPreview portfolio={portfolio} />
+        </section>
       </main>
     </div>
   );
