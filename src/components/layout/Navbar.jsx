@@ -32,6 +32,35 @@ const Navbar = () => {
     };
   }, [location.pathname]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = ["home", "about", "skills", "projects", "contact"];
+
+      let current = "#home";
+
+      for (const section of sections) {
+        const el = document.getElementById(section);
+        if (el) {
+          const top = el.offsetTop - 120;
+          const bottom = top + el.offsetHeight;
+
+          if (window.scrollY >= top && window.scrollY < bottom) {
+            current = `#${section}`;
+          }
+        }
+      }
+
+      setActiveSection(current);
+    };
+
+    if (location.pathname === "/") {
+      window.addEventListener("scroll", handleScroll);
+      handleScroll();
+    }
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [location.pathname]);
+
   const toggleTheme = () => {
     const nextTheme = theme === "light" ? "dark" : "light";
     applyTheme(nextTheme);
@@ -46,22 +75,31 @@ const Navbar = () => {
     { label: "Contact", href: "#contact" },
   ];
 
-  // ✅ FIXED NAVIGATION (NO HASH BUG)
+  const scrollToSection = (href) => {
+    const id = href.replace("#", "");
+    const el = document.getElementById(id);
+
+    if (el) {
+      el.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+      setActiveSection(href);
+    }
+  };
+
   const handleNavClick = (e, href) => {
     e.preventDefault();
     setMenuOpen(false);
-    setActiveSection(href);
 
     if (location.pathname !== "/") {
       navigate("/");
 
       setTimeout(() => {
-        const el = document.querySelector(href);
-        if (el) el.scrollIntoView({ behavior: "smooth" });
-      }, 150);
+        scrollToSection(href);
+      }, 500);
     } else {
-      const el = document.querySelector(href);
-      if (el) el.scrollIntoView({ behavior: "smooth" });
+      scrollToSection(href);
     }
   };
 
@@ -77,15 +115,12 @@ const Navbar = () => {
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
       <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6">
-
-        {/* NAVBAR WRAPPER */}
         <div className="flex items-center justify-between rounded-[30px] border border-slate-200/60 bg-white/70 px-4 py-3 shadow-[0_10px_40px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-slate-800/60 dark:bg-slate-950/60">
-
-          {/* LOGO */}
+          
           <Link to="/" className="flex items-center gap-3">
             <div>
               <h1 className="text-base font-bold text-slate-900 dark:text-white">
-                Md.Adnan Parvez
+                Md. Adnan Parvez
               </h1>
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 Portfolio
@@ -93,9 +128,7 @@ const Navbar = () => {
             </div>
           </Link>
 
-          {/* DESKTOP NAV */}
           <nav className="hidden md:flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/60 p-2 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/60">
-
             {navLinks.map((item) => (
               <button
                 key={item.label}
@@ -106,7 +139,6 @@ const Navbar = () => {
               >
                 {item.label}
 
-                {/* 🔥 UNDERLINE EFFECT */}
                 <span
                   className={`absolute left-1/2 -bottom-1 h-[2px] -translate-x-1/2 rounded-full bg-gradient-to-r from-sky-500 via-indigo-500 to-cyan-400 transition-all duration-300 ${
                     activeSection === item.href ? "w-[60%]" : "w-0"
@@ -116,10 +148,7 @@ const Navbar = () => {
             ))}
           </nav>
 
-          {/* RIGHT SIDE */}
           <div className="flex items-center gap-3">
-
-            {/* THEME */}
             <button
               onClick={toggleTheme}
               className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-800 transition hover:scale-110 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
@@ -127,7 +156,6 @@ const Navbar = () => {
               {theme === "light" ? <FaMoon size={14} /> : <FaSun size={14} />}
             </button>
 
-            {/* ADMIN */}
             {isAdminLoggedIn ? (
               <Link
                 to="/dashboard"
@@ -140,13 +168,12 @@ const Navbar = () => {
                 to="/login"
                 className="hidden rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:scale-110 dark:bg-white dark:text-slate-950 md:inline-flex"
               >
-                .
+                Login
               </Link>
             )}
 
-            {/* MOBILE MENU */}
             <button
-              onClick={() => setMenuOpen((p) => !p)}
+              onClick={() => setMenuOpen((prev) => !prev)}
               className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-800 transition hover:scale-110 dark:border-slate-700 dark:bg-slate-900 dark:text-white md:hidden"
             >
               {menuOpen ? <FaTimes size={16} /> : <FaBars size={16} />}
@@ -154,10 +181,8 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* MOBILE MENU */}
         {menuOpen && (
           <div className="mt-3 rounded-[26px] border border-slate-200 bg-white/95 p-4 shadow-xl backdrop-blur-2xl dark:border-slate-800 dark:bg-slate-900/95 md:hidden">
-
             <div className="flex flex-col gap-2">
               {navLinks.map((item) => (
                 <button
@@ -171,10 +196,8 @@ const Navbar = () => {
                 </button>
               ))}
             </div>
-
           </div>
         )}
-
       </div>
     </header>
   );
