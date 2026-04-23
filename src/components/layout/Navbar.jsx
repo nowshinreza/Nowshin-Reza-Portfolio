@@ -140,7 +140,7 @@ const Navbar = () => {
                 to="/login"
                 className="hidden rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:scale-110 dark:bg-white dark:text-slate-950 md:inline-flex"
               >
-                
+                Login
               </Link>
             )}
 
