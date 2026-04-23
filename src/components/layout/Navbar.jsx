@@ -85,7 +85,7 @@ const Navbar = () => {
           <Link to="/" className="flex items-center gap-3">
             <div>
               <h1 className="text-base font-bold text-slate-900 dark:text-white">
-                Md.Adnan Parvez
+                Nowshin Reza
               </h1>
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 Portfolio

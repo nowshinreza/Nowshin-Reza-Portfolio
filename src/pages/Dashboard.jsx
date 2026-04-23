@@ -899,7 +899,7 @@ const handleLogout = async () => {
               Admin Dashboard
             </h1>
             <p className="mt-2 text-slate-600 dark:text-slate-400">
-              Manage portfolio content, contact info and projects.
+              Manage portfolio content, contact info and projects!!
             </p>
           </div>
 

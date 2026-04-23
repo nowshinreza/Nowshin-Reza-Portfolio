@@ -40,7 +40,7 @@ const SkillsPreview = ({ portfolio }) => {
               <SectionTitle>Skills</SectionTitle>
 
               <div className="rounded-3xl border border-slate-300/70 bg-white/50 p-6 dark:border-slate-700/40 dark:bg-slate-900/30">
-                <div className="grid gap-6 md:grid-cols-2">
+                <div className="grid gap-6 md:grid-cols-3">
                   {portfolio.skills.map((skill, index) => (
                     <div
                       key={index}

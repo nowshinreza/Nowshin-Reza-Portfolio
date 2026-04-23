@@ -51,9 +51,13 @@ const Home = () => {
 
         <section id="contact">
           <ContactPreview portfolio={portfolio} />
+          
         </section>
+        
       </main>
+      
     </div>
+    
   );
 };
 
