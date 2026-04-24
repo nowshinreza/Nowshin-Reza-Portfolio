@@ -149,15 +149,16 @@ const Dashboard = () => {
     },
     skills: Array.isArray(data?.skills) ? data.skills : [],
     certificates: Array.isArray(data?.certificates)
-      ? data.certificates.map((certificate) => ({
-          ...certificate,
-          images: Array.isArray(certificate?.images)
-            ? certificate.images
-            : certificate?.image
-            ? [certificate.image]
-            : [],
-        }))
-      : [],
+  ? data.certificates.map((certificate) => ({
+      ...certificate,
+      image: certificate?.image || certificate?.images?.[0] || "",
+      images: certificate?.image
+        ? [certificate.image]
+        : Array.isArray(certificate?.images)
+        ? certificate.images
+        : [],
+    }))
+  : [],
     experiences: Array.isArray(data?.experiences) ? data.experiences : [],
   });
 
@@ -457,44 +458,49 @@ const handleLogout = async () => {
   };
 
   const addCertificate = () => {
-    if (!certificateForm.name.trim()) {
-      showError("Certificate name is required.");
-      return;
-    }
+  if (!certificateForm.name.trim()) {
+    showError("Certificate name is required.");
+    return;
+  }
 
-    const certificatePayload = {
-      name: certificateForm.name.trim(),
-      issuer: certificateForm.issuer.trim(),
-      images: Array.isArray(certificateForm.images)
-        ? certificateForm.images
-        : [],
-      credentialLink: certificateForm.credentialLink.trim(),
-    };
+  const firstImage =
+    Array.isArray(certificateForm.images) && certificateForm.images.length > 0
+      ? certificateForm.images[0]
+      : "";
 
-    if (editingCertificateIndex !== null) {
-      setPortfolioData((prev) => ({
-        ...prev,
-        certificates: prev.certificates.map((item, index) =>
-          index === editingCertificateIndex ? certificatePayload : item
-        ),
-      }));
-      setEditingCertificateIndex(null);
-      showSuccess("Certificate updated.");
-    } else {
-      setPortfolioData((prev) => ({
-        ...prev,
-        certificates: [...prev.certificates, certificatePayload],
-      }));
-      showSuccess("Certificate added.");
-    }
-
-    setCertificateForm({
-      name: "",
-      issuer: "",
-      images: [],
-      credentialLink: "",
-    });
+  const certificatePayload = {
+    name: certificateForm.name.trim(),
+    issuer: certificateForm.issuer.trim(),
+    image: firstImage,
+    credentialLink: certificateForm.credentialLink.trim(),
   };
+
+  if (editingCertificateIndex !== null) {
+    setPortfolioData((prev) => ({
+      ...prev,
+      certificates: prev.certificates.map((item, index) =>
+        index === editingCertificateIndex ? certificatePayload : item
+      ),
+    }));
+
+    setEditingCertificateIndex(null);
+    showSuccess("Certificate updated.");
+  } else {
+    setPortfolioData((prev) => ({
+      ...prev,
+      certificates: [...prev.certificates, certificatePayload],
+    }));
+
+    showSuccess("Certificate added.");
+  }
+
+  setCertificateForm({
+    name: "",
+    issuer: "",
+    images: [],
+    credentialLink: "",
+  });
+};
 
   const startEditCertificate = (index) => {
     const certificate = portfolioData.certificates[index];
@@ -899,7 +905,7 @@ const handleLogout = async () => {
               Admin Dashboard
             </h1>
             <p className="mt-2 text-slate-600 dark:text-slate-400">
-              Manage portfolio content, contact info and projects!!
+              Manage portfolio content, contact info and projects.
             </p>
           </div>
 

@@ -1,3 +1,5 @@
+import { useRef } from "react";
+
 const CertificateSection = ({
   labelClass,
   inputClass,
@@ -13,6 +15,57 @@ const CertificateSection = ({
   uploadingCertificateImage,
   removeCertificateImage,
 }) => {
+  const fileRef = useRef(null);
+
+  const getImage = (certificate) =>
+    certificate?.image || certificate?.images?.[0] || "";
+
+  const clearFileInput = () => {
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
+  const handleAddCertificate = () => {
+    addCertificate();
+    clearFileInput();
+  };
+
+  const handleEditCertificate = (index) => {
+    const certificate = portfolioData.certificates[index];
+    const image = getImage(certificate);
+
+    setCertificateForm({
+      name: certificate.name || "",
+      issuer: certificate.issuer || "",
+      image,
+      images: Array.isArray(certificate.images)
+        ? certificate.images
+        : image
+        ? [image]
+        : [],
+      credentialLink: certificate.credentialLink || "",
+    });
+
+    startEditCertificate(index);
+    clearFileInput();
+  };
+
+  const handleSaveCertificates = (e) => {
+    if (Array.isArray(portfolioData.certificates)) {
+      portfolioData.certificates.forEach((certificate) => {
+        const image = getImage(certificate);
+
+        certificate.image = image;
+        certificate.images = Array.isArray(certificate.images)
+          ? certificate.images
+          : image
+          ? [image]
+          : [];
+      });
+    }
+
+    handleSavePortfolio(e);
+  };
+
   return (
     <div className="space-y-10">
       <div>
@@ -20,8 +73,7 @@ const CertificateSection = ({
           Certificates
         </h2>
         <p className="mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-400">
-          Add your certificate name, issuer, image, and credential link in a
-          clean and professional way.
+          Add your certificate name, issuer, image, and credential link.
         </p>
       </div>
 
@@ -77,40 +129,37 @@ const CertificateSection = ({
 
           <div className="md:col-span-2">
             <label className={labelClass}>Certificate Image</label>
-
             <input
+              ref={fileRef}
               type="file"
-              multiple
               accept="image/*"
+              multiple
               onChange={handleCertificateImageUpload}
-              className="w-full rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-4 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+              className={inputClass}
             />
 
             {uploadingCertificateImage && (
-              <p className="mt-2 text-sm font-medium text-blue-600 dark:text-blue-400">
+              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
                 Uploading certificate image...
               </p>
             )}
 
             {certificateForm.images?.length > 0 && (
-              <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
                 {certificateForm.images.map((img, index) => (
-                  <div
-                    key={index}
-                    className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-sm dark:border-slate-700 dark:bg-slate-900"
-                  >
+                  <div key={`${img}-${index}`} className="relative">
                     <img
                       src={img}
-                      alt={`Certificate ${index + 1}`}
-                      className="h-36 w-full rounded-xl object-contain bg-slate-100 dark:bg-slate-800"
+                      alt={`certificate-${index}`}
+                      className="h-24 w-full rounded-2xl border border-slate-200 object-cover dark:border-slate-700"
                     />
 
                     <button
                       type="button"
                       onClick={() => removeCertificateImage(index)}
-                      className="absolute right-3 top-3 rounded-full bg-red-600 px-2 py-1 text-xs font-bold text-white shadow hover:bg-red-500"
+                      className="absolute right-2 top-2 rounded-lg bg-red-500 px-2 py-1 text-xs font-medium text-white"
                     >
-                      ✕
+                      Remove
                     </button>
                   </div>
                 ))}
@@ -121,8 +170,8 @@ const CertificateSection = ({
 
         <button
           type="button"
-          onClick={addCertificate}
-          className="mt-6 inline-flex rounded-2xl bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:scale-[1.02] hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
+          onClick={handleAddCertificate}
+          className="mt-6 inline-flex rounded-2xl bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
         >
           {editingCertificateIndex !== null
             ? "Update Certificate"
@@ -136,74 +185,82 @@ const CertificateSection = ({
             No certificates added yet.
           </div>
         ) : (
-          portfolioData.certificates.map((certificate, index) => (
-            <div
-              key={index}
-              className="group relative overflow-hidden rounded-[30px] border border-slate-200/80 bg-white/85 p-5 shadow-[0_18px_50px_rgba(15,23,42,0.06)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 dark:border-slate-700/70 dark:bg-slate-900/55"
-            >
-              <div className="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex min-w-0 items-center gap-4">
-                  {certificate.images?.[0] && (
-                    <div className="h-20 w-28 flex-shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-md dark:border-slate-700 dark:bg-slate-800">
-                      <img
-                        src={certificate.images[0]}
-                        alt={certificate.name}
-                        className="h-full w-full object-contain transition duration-500 group-hover:scale-105"
-                      />
+          portfolioData.certificates.map((certificate, index) => {
+            const certificateImage = getImage(certificate);
+
+            return (
+              <div
+                key={`${certificate.name}-${index}`}
+                className="group rounded-[30px] border border-slate-200/80 bg-white/85 p-5 shadow-[0_18px_50px_rgba(15,23,42,0.06)] transition hover:-translate-y-1 dark:border-slate-700/70 dark:bg-slate-900/55"
+              >
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex min-w-0 items-center gap-4">
+                    {certificateImage ? (
+                      <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-2xl border bg-slate-100 shadow-md dark:border-slate-700 dark:bg-slate-800">
+                        <img
+                          src={certificateImage}
+                          alt={certificate.name}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl border bg-slate-100 text-[10px] text-slate-400 dark:border-slate-700 dark:bg-slate-800">
+                        No image
+                      </div>
+                    )}
+
+                    <div className="min-w-0">
+                      <h3 className="truncate text-xl font-bold text-slate-900 dark:text-white sm:text-2xl">
+                        {certificate.name}
+                      </h3>
+
+                      {certificate.issuer && (
+                        <p className="mt-1 text-sm font-medium text-slate-600 dark:text-slate-400">
+                          {certificate.issuer}
+                        </p>
+                      )}
+
+                      {certificate.credentialLink && (
+                        <a
+                          href={certificate.credentialLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-3 inline-flex text-sm font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                        >
+                          View Credential
+                        </a>
+                      )}
                     </div>
-                  )}
+                  </div>
 
-                  <div className="min-w-0">
-                    <h3 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
-                      {certificate.name}
-                    </h3>
+                  <div className="flex flex-wrap gap-3 sm:justify-end">
+                    <button
+                      type="button"
+                      onClick={() => handleEditCertificate(index)}
+                      className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700 hover:bg-amber-100 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300"
+                    >
+                      Edit
+                    </button>
 
-                    {certificate.issuer && (
-                      <p className="mt-1 text-sm font-medium text-slate-600 dark:text-slate-400">
-                        {certificate.issuer}
-                      </p>
-                    )}
-
-                    {certificate.credentialLink && (
-                      <a
-                        href={certificate.credentialLink}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="mt-3 inline-flex text-sm font-semibold text-blue-600 transition hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                      >
-                        View Credential
-                      </a>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => removeCertificate(index)}
+                      className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300"
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
-
-                <div className="flex flex-wrap gap-3 sm:justify-end">
-                  <button
-                    type="button"
-                    onClick={() => startEditCertificate(index)}
-                    className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700 transition-all duration-300 hover:scale-[1.03] hover:bg-amber-100 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300 dark:hover:bg-amber-500/20"
-                  >
-                    Edit
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => removeCertificate(index)}
-                    className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition-all duration-300 hover:scale-[1.03] hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/20"
-                  >
-                    Delete
-                  </button>
-                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 
       <button
         type="button"
-        onClick={handleSavePortfolio}
-        className="inline-flex rounded-2xl bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:scale-[1.02] hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
+        onClick={handleSaveCertificates}
+        className="inline-flex rounded-2xl bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
       >
         Save Certificates
       </button>
